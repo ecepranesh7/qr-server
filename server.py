@@ -11,6 +11,7 @@ database_url = os.environ["FIREBASE_DB_URL"]
 cred = credentials.Certificate(json.loads(service_account_json))
 firebase_admin.initialize_app(cred, {"databaseURL": database_url})
 
+# ---------- Stream URL ----------
 STREAM_URL = os.environ["ESP32_STREAM_URL"]
 
 app = Flask(__name__)
@@ -26,7 +27,7 @@ def scanner():
             cap = cv2.VideoCapture(STREAM_URL)
 
             if not cap.isOpened():
-                print("Stream failed, retrying...")
+                print("Stream open failed, retrying...")
                 time.sleep(5)
                 continue
 
@@ -38,7 +39,7 @@ def scanner():
                 data, bbox, _ = detector.detectAndDecode(frame)
 
                 if data:
-                    print("QR:", data)
+                    print("QR detected:", data)
 
                     valid = db.reference(f"/authorized_qr/{data}").get() == True
                     status = "VALID" if valid else "INVALID"
